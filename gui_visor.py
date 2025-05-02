@@ -8,6 +8,10 @@ from scheduler import fcfs, sjf, round_robin
 from client import procesar_archivo
 import random
 
+root = tk.Tk()
+root.title("Simulador OS - Scheduling Visual")
+root.geometry("1000x700")
+
 modo = tk.StringVar(value='thread')
 algoritmo = tk.StringVar(value='FCFS')
 quantum = tk.IntVar(value=2)
@@ -66,7 +70,6 @@ def iniciar():
         p['y'] = y_base + i * 40
 
     def ejecutar(p):
-        start = time.time()
         duracion = p['end'] - p['start']
         for i in range(int(duracion*10)):
             time.sleep(0.1)
@@ -90,10 +93,6 @@ def iniciar():
             if pid == 0:
                 ejecutar(p)
                 os._exit(0)
-
-root = tk.Tk()
-root.title("Simulador OS - Scheduling Visual")
-root.geometry("1000x700")
 
 frame_config = tk.Frame(root)
 frame_config.pack(side=tk.LEFT, fill=tk.Y, padx=10, pady=10)
