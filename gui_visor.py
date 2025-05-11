@@ -1,12 +1,14 @@
+
+
+import os
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 import threading
 import time
-import os
 import shutil
-from scheduler import fcfs, sjf, round_robin
-from client import procesar_archivo
 import random
+from scheduler import fcfs, sjf, round_robin
+from client import procesar_archivo, parse_file
 
 root = tk.Tk()
 modo = tk.StringVar(value='thread')
@@ -30,7 +32,7 @@ def seleccionar_archivos():
         destino = os.path.join(uploads_folder, os.path.basename(archivo))
         shutil.copy(archivo, destino)
         pid = f"P{inicio_index + i + 1}"
-        arrival = 0  # tiempo base 0 para simplificar visual
+        arrival = 0
         burst = burst_base + random.randint(1, 4)
         procesos.append({
             "pid": pid,
@@ -69,7 +71,8 @@ def iniciar():
 
     canvas.delete("all")
     resultados_tabla.delete(*resultados_tabla.get_children())
-    plan = []
+    for widget in scrollable_frame.winfo_children():
+        widget.destroy()
 
     if algoritmo.get() == "FCFS":
         plan = fcfs(procesos)
@@ -99,8 +102,23 @@ def iniciar():
             canvas.create_text(x_fin, y + 35, text=str(int(p['end'])), fill="black")
 
         resultados_tabla.insert("", "end", values=[
-            p['pid'], os.path.basename(p['archivo']), round(p['start'], 2), round(p['end'], 2), p['burst'], round(p['waiting'], 2), round(p['turnaround'], 2)
+            p['pid'], os.path.basename(p['archivo']), round(p['start'], 2),
+            round(p['end'], 2), p['burst'], round(p['waiting'], 2), round(p['turnaround'], 2)
         ])
+
+        datos = parse_file(p['archivo'], p['pid'])
+        ttk.Label(scrollable_frame, text=f"{p['pid']} - {datos['archivo']}", font=('Arial', 10, 'bold')).pack(anchor="w", pady=(10, 0))
+        columnas = [k for k in datos if k not in ['pid', 'archivo']]
+        tabla = ttk.Treeview(scrollable_frame, columns=columnas, show="headings", height=5)
+        for col in columnas:
+            tabla.heading(col, text=col)
+            tabla.column(col, width=100)
+
+        max_filas = max(len(datos[c].split(", ")) for c in columnas if datos[c])
+        for i in range(max_filas):
+            fila = [datos[c].split(", ")[i] if datos[c] and len(datos[c].split(", ")) > i else "" for c in columnas]
+            tabla.insert("", "end", values=fila)
+        tabla.pack(fill="x", pady=(0, 10))
 
         if modo.get() == "thread":
             threading.Thread(target=procesar_archivo, args=(p,)).start()
@@ -110,8 +128,9 @@ def iniciar():
                 procesar_archivo(p)
                 os._exit(0)
 
+
 root.title("Simulador OS - Scheduling Visual")
-root.geometry("1000x700")
+root.geometry("1100x750")
 
 frame_config = tk.Frame(root)
 frame_config.pack(side=tk.LEFT, fill=tk.Y, padx=10, pady=10)
@@ -155,6 +174,25 @@ for col in cols:
     resultados_tabla.column(col, width=100)
 resultados_tabla.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
+
+scroll_canvas = tk.Canvas(frame_visual)
+scrollbar = tk.Scrollbar(frame_visual, orient="vertical", command=scroll_canvas.yview)
+scrollable_frame = tk.Frame(scroll_canvas)
+
+scrollable_frame.bind(
+    "<Configure>",
+    lambda e: scroll_canvas.configure(
+        scrollregion=scroll_canvas.bbox("all")
+    )
+)
+
+scroll_window = scroll_canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+scroll_canvas.configure(yscrollcommand=scrollbar.set)
+
+scroll_canvas.pack(side="left", fill="both", expand=True, padx=10, pady=10)
+scrollbar.pack(side="right", fill="y")
+
 toggle_quantum()
 root.mainloop()
+
 
