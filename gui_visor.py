@@ -12,7 +12,7 @@ root = tk.Tk()
 modo = tk.StringVar(value='thread')
 algoritmo = tk.StringVar(value='FCFS')
 quantum = tk.IntVar(value=2)
-cantidad_procesos = tk.IntVar(value=3)
+cantidad_procesos = tk.IntVar(value=1)
 procesos = []
 burst_base = 3
 uploads_folder = "uploads"
