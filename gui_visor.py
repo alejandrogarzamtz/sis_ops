@@ -1,5 +1,3 @@
-
-
 import os
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
@@ -128,7 +126,6 @@ def iniciar():
                 procesar_archivo(p)
                 os._exit(0)
 
-
 root.title("Simulador OS - Scheduling Visual")
 root.geometry("1100x750")
 
@@ -174,9 +171,10 @@ for col in cols:
     resultados_tabla.column(col, width=100)
 resultados_tabla.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
-
 scroll_canvas = tk.Canvas(frame_visual)
 scrollbar = tk.Scrollbar(frame_visual, orient="vertical", command=scroll_canvas.yview)
+h_scrollbar = tk.Scrollbar(frame_visual, orient="horizontal", command=scroll_canvas.xview)
+
 scrollable_frame = tk.Frame(scroll_canvas)
 
 scrollable_frame.bind(
@@ -187,10 +185,11 @@ scrollable_frame.bind(
 )
 
 scroll_window = scroll_canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
-scroll_canvas.configure(yscrollcommand=scrollbar.set)
+scroll_canvas.configure(yscrollcommand=scrollbar.set, xscrollcommand=h_scrollbar.set)
 
 scroll_canvas.pack(side="left", fill="both", expand=True, padx=10, pady=10)
 scrollbar.pack(side="right", fill="y")
+h_scrollbar.pack(side="bottom", fill="x")
 
 toggle_quantum()
 root.mainloop()
